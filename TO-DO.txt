@@ -1,0 +1,20 @@
+Por enquanto a extração só funcionou com os exames 44 e 43.
+Tudo que já foi tentado está registrado no arquivo "contexto.txt" e pode ser fornecido para outro modelo a fim de que possamos evitar que ele proponha algo que já foi experimentado e não funcionou.
+
+Fase 01: Preparação dos Dados (vetoriza_questoes.py)
+Fase 02: Análise e Clusterização (02_clusterizacao.py)
+Fase 03: Análise de Resultados e Redação do Trabalho
+
+Interpretação: Esta é a parte "humana". Você olhará para os clusters e dirá: "Ok, o Cluster 3, com as palavras 'tributo', 'imposto', 'fiscal', 'crédito', claramente representa o Direito Tributário".
+
+Comparação: Você vai comparar o K-Means e o GMM. O GMM conseguiu separar melhor as questões interdisciplinares? O K-Means foi mais rápido? As métricas confirmam qual foi melhor?
+
+    Seção 6: Visualização (Opcional, mas recomendado): 
+        Usar t-SNE ou UMAP para reduzir a dimensionalidade.
+        Gerar os gráficos de dispersão 2D coloridos pelos clusters.
+
+Discussão: Discutir as limitações. Houve algum cluster "lixo" que misturou vários assuntos? Por que isso pode ter acontecido? (Talvez questões muito curtas, ou temas muito parecidos).
+
+Conclusão: Resumir suas descobertas. "Este trabalho demonstrou a viabilidade de usar técnicas de clustering não supervisionado para categorizar automaticamente questões jurídicas, com o algoritmo X mostrando um desempenho superior de acordo com a métrica Y. A análise qualitativa revelou N clusters coerentes, correspondendo a áreas do direito como..."
+
+Escrita do Artigo/Dissertação: Estruturar tudo isso no formato acadêmico (Introdução, Metodologia, Resultados, Discussão, Conclusão).
