@@ -22,7 +22,7 @@ OK
 7) Relatório final de execução.
 
 pip install pdfplumber
-python gera_json_oab.py
+python extracao_PDF_geracao_JSON.py
 
 """
 
