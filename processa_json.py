@@ -1,3 +1,15 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Gera JSON enxuto para agrupamento
+ 
+Autor......: Daniel Talon
+Criação....: 2025-11-15
+Atualização: 2025-11-17 
+Descrição..: Utiliza o JSON gerado por extracao_PDF_geracao_JSON.py para criar uma versao mais enxuta de JSON contendo somente os campos especificados em CAMPOS_DESEJADOS e que atendam os criterios de FILTROS_DE_CONTEUDO
+
+"""
+
 import json
 import os
 
@@ -13,11 +25,11 @@ CAMPOS_DESEJADOS = {
     "data_prova_1a_fase": False,
     "disciplina": False,
     "enunciado": True,
-    "alternativas": False,
+    "alternativas": True,
     "resposta_correta_preliminar_letra": False,
     "resposta_correta_preliminar_texto": False,
-    "resposta_correta_definitiva_letra": False,
-    "resposta_correta_definitiva_texto": False,
+    "resposta_correta_definitiva_letra": True,
+    "resposta_correta_definitiva_texto": True,
     "status_gabarito": False,
     "status_questao": True # Deixei como True para vermos o filtro de status funcionando
 }
@@ -31,7 +43,7 @@ CAMPOS_DESEJADOS = {
 # FILTROS_DE_CONTEUDO = {} -> Inclui todas as questões
 FILTROS_DE_CONTEUDO = {
     #"ano": 2025,
-    "status_questao": "MANTIDA"
+    "status_questao": "MANTIDA" # questoes que nao foram anuladas e constam como validas no gabarito definitivo
 }
 
 
