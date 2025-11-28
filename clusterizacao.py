@@ -23,6 +23,8 @@ Principais pontos do script
 Execução do script:
 
 pip install matplotlib seaborn wordcloud pandas scikit-learn scipy
+pip install umap-learn
+
 python clusterizacao.py
 
 """
@@ -43,6 +45,9 @@ from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bo
 from scipy.cluster.hierarchy import dendrogram, linkage
 from sklearn.neighbors import NearestNeighbors
 
+# Adicione esta importação no topo do seu arquivo
+import seaborn as sns
+import umap.umap_ as umap
 
 # --- CONSTANTES DE CONFIGURAÇÃO ---
 PASTA_DADOS = 'dados_processados'
@@ -289,6 +294,7 @@ def executar_hierarquico_e_plotar_dendrograma(matriz_densa):
         show_contracted=True,   # Para representar um cluster por um único nó
     )
     
+    plt.ylim(0.75, 2.1) # limita eixo Y entre 0,75 e 2,1 
     plt.grid(axis='y')
     caminho_dendrograma = os.path.join(PASTA_RESULTADOS, 'dendrograma_hierarquico.png')
     plt.savefig(caminho_dendrograma)
@@ -306,7 +312,15 @@ def executar_dbscan_e_analisar_outliers(matriz_densa, ids_questoes, mapa_questoe
     # Calcula a distância para os k-vizinhos mais próximos (k=min_samples)
     # e plota. O "cotovelo" nesse gráfico é um bom candidato para 'eps'.
     # min_samples geralmente é 2 * n_dimensões, mas para texto podemos usar um valor menor.
-    min_samples = 5
+    min_samples = 7
+    #min_samples = 5
+    
+    # Com base no gráfico, um "cotovelo" pode aparecer. Vamos chutar um valor inicial.
+    # Se a curva for suave, pode precisar de ajuste manual.
+    eps_estimado = 1.32 #  Valor para min_samples = 7
+    #eps_estimado = 1.28 # Valor para min_samples = 5
+
+    
     nbrs = NearestNeighbors(n_neighbors=min_samples).fit(matriz_densa)
     distances, indices = nbrs.kneighbors(matriz_densa)
     
@@ -323,11 +337,6 @@ def executar_dbscan_e_analisar_outliers(matriz_densa, ids_questoes, mapa_questoe
     plt.savefig(os.path.join(PASTA_RESULTADOS, 'dbscan_eps_finder.png'))
     plt.close()
     
-    # Com base no gráfico, um "cotovelo" pode aparecer. Vamos chutar um valor inicial.
-    # Se a curva for suave, pode precisar de ajuste manual.
-    #eps_estimado = 1.3 # VALOR PARA AJUSTAR APÓS OLHAR O GRÁFICO
-    eps_estimado = 1.28
-
     print(f"Gráfico para escolha do 'eps' salvo. Estimando um valor inicial de eps={eps_estimado}")
 
     # Executar o DBSCAN
@@ -359,6 +368,50 @@ def executar_dbscan_e_analisar_outliers(matriz_densa, ids_questoes, mapa_questoe
                 f.write("-" * 50 + "\n\n")
 
     print(f"Análise do DBSCAN concluída. Relatório de outliers salvo.")
+
+def gerar_visualizacao_umap(matriz_densa, resultados, k_escolhido):
+    """
+    Aplica UMAP para reduzir a dimensionalidade e gera um gráfico de dispersão dos clusters.
+    """
+    print("\n--- Gerando Visualização UMAP dos Clusters ---")
+    
+    # Configura e aplica o UMAP
+    # n_neighbors e min_dist são parâmetros que controlam o layout.
+    # random_state garante que a visualização seja a mesma a cada execução.
+    reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=2, random_state=42)
+    embedding = reducer.fit_transform(matriz_densa)
+    
+    # Cria um DataFrame para facilitar a plotagem com Seaborn
+    df_plot = pd.DataFrame(embedding, columns=['UMAP1', 'UMAP2'])
+    
+    # Adiciona os rótulos dos clusters do K-Means e GMM
+    df_plot['K-Means'] = resultados['K-Means']['labels']
+    df_plot['GMM'] = resultados['GMM']['labels']
+
+    # Gera e salva um gráfico para cada algoritmo
+    for nome_modelo in ['K-Means', 'GMM']:
+        plt.figure(figsize=(12, 10))
+        
+        sns.scatterplot(
+            x='UMAP1',
+            y='UMAP2',
+            hue=nome_modelo,
+            palette=sns.color_palette("hsv", k_escolhido),
+            data=df_plot,
+            legend="full",
+            alpha=0.7
+        )
+        
+        plt.title(f'Visualização dos Clusters com UMAP ({nome_modelo})', fontsize=16)
+        plt.xlabel('Componente UMAP 1')
+        plt.ylabel('Componente UMAP 2')
+        plt.grid(True)
+        
+        caminho_grafico = os.path.join(PASTA_RESULTADOS, f'visualizacao_umap_{nome_modelo.lower()}.png')
+        plt.savefig(caminho_grafico)
+        plt.close()
+        
+        print(f"Gráfico UMAP para {nome_modelo} salvo em: {caminho_grafico}")
 
 def main():
     """Função principal que orquestra todo o processo."""
@@ -394,6 +447,9 @@ def main():
     executar_hierarquico_e_plotar_dendrograma(matriz_densa)
 
     executar_dbscan_e_analisar_outliers(matriz_densa, ids_questoes, mapa_questoes)
+
+    # A última etapa: gerar as visualizações de alta dimensionalidade
+    gerar_visualizacao_umap(matriz_densa, resultados, K_ESCOLHIDO)
 
     print(f"\nProcesso de clusterização concluído!")
     print(f"Todos os resultados foram salvos na pasta: '{PASTA_RESULTADOS}'")
